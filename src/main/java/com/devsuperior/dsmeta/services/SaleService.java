@@ -20,10 +20,11 @@ import com.devsuperior.dsmeta.repositories.SaleRepository;
 
 @Service
 public class SaleService {
+	private final LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
 
 	@Autowired
 	private SaleRepository repository;
-	
+
 	public SaleMinDTO findById(Long id) {
 		Optional<Sale> result = repository.findById(id);
 		Sale entity = result.get();
@@ -31,38 +32,37 @@ public class SaleService {
 	}
 
     public Page<SaleReportDTO> getReport(String minDate, String maxDate, String name, Pageable pageable) {
-		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-		LocalDate min;
-		LocalDate max;
-		try{
-			min = LocalDate.parse(minDate);
-		}catch(DateTimeParseException e){
-			min = today.minusYears(1L);
-		}
-		try{
-			max = LocalDate.parse(maxDate);
-		}catch(DateTimeParseException e){
-			max = today;
-		}
+		LocalDate min = validateMinDate(minDate);
+		LocalDate max = validateMaxDate(maxDate);
+
 		return repository.getReport(min, max, name, pageable);
 	}
 
 	public List<SaleSummaryDTO> getSummary(String minDate, String maxDate) {
-		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-		LocalDate min;
+		LocalDate min = validateMinDate(minDate);
+		LocalDate max = validateMaxDate(maxDate);
+
+		return repository.getSummary(min, max);
+	}
+
+	private LocalDate validateMaxDate(String maxDate) {
 		LocalDate max;
-		try{
-			min = LocalDate.parse(minDate);
-		}catch(DateTimeParseException e){
-			min = today.minusYears(1L);
-		}
 		try{
 			max = LocalDate.parse(maxDate);
 		}catch(DateTimeParseException e){
 			max = today;
 		}
+		return max;
+	}
 
-		return repository.getSummary(min, max);
+	private LocalDate validateMinDate(String minDate){
+		LocalDate min;
+		try{
+			min = LocalDate.parse(minDate);
+		}catch(DateTimeParseException e){
+			min = today.minusYears(1L);
+		}
+		return min;
 	}
 
 
