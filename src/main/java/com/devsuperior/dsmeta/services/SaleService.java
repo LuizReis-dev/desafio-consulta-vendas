@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 
 import com.devsuperior.dsmeta.dto.SaleReportDTO;
+import com.devsuperior.dsmeta.dto.SaleSummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +46,24 @@ public class SaleService {
 		}
 		return repository.getReport(min, max, name, pageable);
 	}
+
+	public List<SaleSummaryDTO> getSummary(String minDate, String maxDate) {
+		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		LocalDate min;
+		LocalDate max;
+		try{
+			min = LocalDate.parse(minDate);
+		}catch(DateTimeParseException e){
+			min = today.minusYears(1L);
+		}
+		try{
+			max = LocalDate.parse(maxDate);
+		}catch(DateTimeParseException e){
+			max = today;
+		}
+
+		return repository.getSummary(min, max);
+	}
+
+
 }
